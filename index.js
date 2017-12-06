@@ -10,6 +10,8 @@ let template = require('./template.json');
 const CONFIG_FILENAME = 'quorum-config.json';
 const OUTPUT = 'quorum-genesis.json';
 
+const VOTING_CONTRACT_ADDR = '0x0000000000000000000000000000000000000020';
+
 function padIndex(number, prefix) {
   if(prefix) {
     return utils.addHexPrefix(utils.setLengthLeft([number], 32, false).toString('hex'));
@@ -32,20 +34,20 @@ function mapAddresses(index, addresses) {
   let value = utils.intToHex(1);
   for(let i=0; i<addresses.length; i++) {
     let key = storageKey(index, addresses[i]);
-    template['alloc']['0x0000000000000000000000000000000000000020'].storage[key] = value;
+    template['alloc'][VOTING_CONTRACT_ADDR].storage[key] = value;
   }
 }
 
 function buildStorage(input) {
-  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(1,true)] = utils.intToHex(input.threshold);
-  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(2,true)] = utils.intToHex(input.voters.length);
+  template['alloc'][VOTING_CONTRACT_ADDR].storage[padIndex(1,true)] = utils.intToHex(input.threshold);
+  template['alloc'][VOTING_CONTRACT_ADDR].storage[padIndex(2,true)] = utils.intToHex(input.voters.length);
   mapAddresses(3, input.voters);
-  template['alloc']['0x0000000000000000000000000000000000000020'].storage[padIndex(4,true)] = utils.intToHex(input.makers.length);
+  template['alloc'][VOTING_CONTRACT_ADDR].storage[padIndex(4,true)] = utils.intToHex(input.makers.length);
   mapAddresses(5,input.makers);
 }
 
 function fundAddresses(input) {
-  let all = input.voters.concat(input.makers);
+  let all = input.voters.concat(input.makers.concat([VOTING_CONTRACT_ADDR]));
   for(let i=0; i<all.length; i++) {
     template['alloc'][utils.addHexPrefix(all[i])] = { balance: "1000000000000000000000000000"};
   }
