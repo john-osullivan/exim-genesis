@@ -47,10 +47,11 @@ function buildStorage(input) {
 }
 
 function fundAddresses(input) {
-  let all = input.voters.concat(input.makers.concat([VOTING_CONTRACT_ADDR]));
+  let all = input.voters.concat(input.makers);
   for(let i=0; i<all.length; i++) {
     template['alloc'][utils.addHexPrefix(all[i])] = { balance: "1000000000000000000000000000"};
   }
+  template['alloc'][VOTING_CONTRACT_ADDR].balance = "1000000000000000000000000000";
 }
 
 function loadConfig() {
