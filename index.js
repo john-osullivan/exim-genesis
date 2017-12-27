@@ -45,7 +45,7 @@ function buildStorage(input) {
 }
 
 function fundAddresses(input) {
-  let all = input.voters.concat(input.makers);
+  let all = input.voters.concat(input.makers.concat(input.fundedObservers));
   for(let i=0; i<all.length; i++) {
     template['alloc'][utils.addHexPrefix(all[i])] = { balance: "1000000000000000000000000000"};
   }
@@ -74,6 +74,11 @@ function loadConfig() {
   if(!json.makers || json.makers.length < 1) {
     console.log(" > BlockMaker addresses missing or less than 1" );
     process.exit(1);
+  }
+
+  if(!json.fundedObservers) {
+    // Just use empty list for backwards compatibility
+    json.fundedObservers = [];
   }
 
   return json;
