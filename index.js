@@ -51,6 +51,10 @@ function fundAddresses(input) {
   }
 }
 
+function setGasLimit(input) {
+    template['gasLimit'] = input.gasLimit;
+}
+
 function loadConfig() {
   let fn = path.join(process.cwd(),CONFIG_FILENAME);
   if(!fs.existsSync(fn)) {
@@ -87,6 +91,7 @@ function loadConfig() {
 function main() {
   let input = loadConfig();
   buildStorage(input);
+  setGasLimit(input);
   fundAddresses(input)
   fs.writeFileSync(path.join(process.cwd(),OUTPUT), JSON.stringify(template, null, 2));
 }
