@@ -8,7 +8,7 @@ var uniq = require('lodash.uniq');
 const utils = require('ethereumjs-util');
 let template = require('./template.json');
 
-const CONFIG_FILENAME = 'sampleConfig.json';
+const CONFIG_FILENAME = 'quorum-config.json';
 const OUTPUT = 'quorum-genesis.json';
 
 const VOTING_CONTRACT_ADDR = '0x0000000000000000000000000000000000000020';
@@ -42,21 +42,22 @@ function mapAddresses(index, addresses, storageAddress) {
 
 function buildVotingStorage(input) {
   template['alloc'][VOTING_CONTRACT_ADDR].storage[padIndex(1,true)] = utils.intToHex(input.threshold);
-  template['alloc'][VOTING_CONTRACT_ADDR].storage[padIndex(2,true)] = utils.intToHex(input.blockVoters.length);
-  mapAddresses(3, input.blockVoters, VOTING_CONTRACT_ADDR);
-  template['alloc'][VOTING_CONTRACT_ADDR].storage[padIndex(4,true)] = utils.intToHex(input.blockMakers.length);
-  mapAddresses(5,input.blockMakers, VOTING_CONTRACT_ADDR);
+  template['alloc'][VOTING_CONTRACT_ADDR].storage[padIndex(2,true)] = utils.intToHex(input.voters.length);
+  mapAddresses(3, input.voters, VOTING_CONTRACT_ADDR);
+  template['alloc'][VOTING_CONTRACT_ADDR].storage[padIndex(4,true)] = utils.intToHex(input.makers.length);
+  mapAddresses(5,input.makers, VOTING_CONTRACT_ADDR);
 }
 
 function buildGovernanceStorage(input){
-  mapAddresses(0, input.governanceOwners, GOVERNANCE_CONTRACT_ADDR);
-  template['alloc'][GOVERNANCE_CONTRACT_ADDR].storage[padIndex(1,true)] = utils.intToHex(input.governanceOwners.length);
+  mapAddresses(0, input.owners, GOVERNANCE_CONTRACT_ADDR);
+  template['alloc'][GOVERNANCE_CONTRACT_ADDR].storage[padIndex(1,true)] = utils.intToHex(input.owners.length);
 }
 
 function fundAddresses(input) {
-  let all = uniq(input.blockMakers
-    .concat(input.blockVoters)
-    .concat(input.governanceOwners));
+  let all = uniq(input.makers
+    .concat(input.voters)
+    .concat(input.fundedObservers)
+    .concat(input.owners));
   for(let i=0; i<all.length; i++) {
     template['alloc'][utils.addHexPrefix(all[i])] = { balance: "1000000000000000000000000000"};
   }
@@ -79,19 +80,24 @@ function loadConfig() {
     process.exit(1);
   }
 
-  if(!json.blockVoters || json.blockVoters.length < json.threshold) {
+  if(!json.voters || json.voters.length < json.threshold) {
     console.log(" > Voter addresses missing or less than the threshold" );
     process.exit(1);
   }
 
-  if(!json.blockMakers || json.blockMakers.length < 1) {
-    console.log(" > BlockMaker addresses missing or less than 1" );
+  if(!json.makers || json.makers.length < 1) {
+    console.log(" > Maker addresses missing or less than 1" );
     process.exit(1);
   }
 
-  if (!json.governanceOwners || json.governanceOwners.length <1 ) {
-    console.log(" > GovernanceOwner addresses missing or less than 1");
-    process.exit(1);
+  if (!json.owners || json.owners.length < 1 ) {
+    // Default to using all validators as governance owners
+    json.owners = json.voters;
+  }
+
+  if (!json.fundedObservers) {
+    // Default to empty observer array for backwards compatibility
+    json.fundedObservers = []
   }
 
   return json;
