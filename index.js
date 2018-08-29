@@ -106,7 +106,8 @@ function loadConfig() {
 function main() {
   let input = loadConfig();
   buildVotingStorage(input);
-  buildGovernanceStorage(input);
+  // TODO: Add back governance storage
+  // buildGovernanceStorage(input);
   fundAddresses(input)
   fs.writeFileSync(path.join(process.cwd(),OUTPUT), JSON.stringify(template, null, 2));
 }
