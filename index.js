@@ -65,6 +65,10 @@ function fundAddresses(input) {
   template['alloc'][GOVERNANCE_CONTRACT_ADDR].balance = "1000000000000000000000000000";
 }
 
+function setGasLimit(input) {
+    template['gasLimit'] = input.gasLimit;
+}
+
 function loadConfig() {
   let fn = path.join(process.cwd(),CONFIG_FILENAME);
   if(!fs.existsSync(fn)) {
@@ -107,6 +111,7 @@ function main() {
   let input = loadConfig();
   buildVotingStorage(input);
   buildGovernanceStorage(input);
+  setGasLimit(input);
   fundAddresses(input)
   fs.writeFileSync(path.join(process.cwd(),OUTPUT), JSON.stringify(template, null, 2));
 }
